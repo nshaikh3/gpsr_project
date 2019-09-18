@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+    <h1>GPSR Calculation</h1>
+    <div class="row">
+        <div class="col-md-4">
+            {{ wtf.quick_form(form) }}
+        </div>
+    </div>
+
+    <p><a href="/">Click here to calculate again</a>
+
+    <div class="row">
+        <div class="col-md-4">
+            <p> Country = {{country}} </p>
+            <p> Material = {{form.material.data}} </p>
+            <p> Year = {{form.year.data}} </p>
+            <p> Indicator = {{form.indicator.data}} </p>
+        </div>
+    
+        <div class="col-md-8"
+            <p>The HHI score is: {{ hhi }}</p>
+            <p>The GPSR score is: {{ gpsr }}</p>
+        </div>
+    </div>
+
+{% endblock %}
