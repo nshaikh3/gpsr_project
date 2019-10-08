@@ -1,12 +1,12 @@
 {% extends "layout.html" %}
 
-{% block app_content %}
-    <div class="row">
-        <h1><a href="{{ url_for('calculate') }}">GPSR Calculation</a></h1>
-    </div>
+{% block content %}
+        <div class="row calculationOption">
+            <h1><a href="{{ url_for('calculate') }}">GPSR Calculation</a></h1>
+        </div>
 
-    <div class="row">
-        <h1><a href="{{ url_for('calculate1') }}">Recycling Reduction Calculation</h1>
-    </div>
+        <div class="row calculationOption">
+            <h1><a href="{{ url_for('calculate1') }}">Requirement Reduction Calculation</a></h1>
+        </div>
     
 {% endblock %}

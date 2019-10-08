@@ -1,10 +1,11 @@
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import io
-import base64
+import plotly
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+import json
 
-myfile2 = pd.ExcelFile(r'C:\Users\noor-\Desktop\Waterloo\Research\GeoPolRisk.xlsx')
+myfile2 = pd.ExcelFile(r'C:\Users\noor-\Desktop\Waterloo\Research\gpsr_project\data\GeoPolRisk.xlsx')
 print(myfile2.sheet_names)
 
 countries = myfile2.parse('Countries')
@@ -68,8 +69,16 @@ trade = trade.fillna(0.0)
 trade.index.levels[-1].astype('float64')
 #trade.head(100)
 
-def wgi_score(country, year):
-    print("WGI Score: {}".format(wgi.loc[(year, country), 'WGI Score']))
+def country_name(country):
+      country_name = countries.loc[country, 'Country Name']
+      return country_name
+
+def material_name(material):
+      material_name = materials.loc[material, 'Commodity']
+      return material_name
+
+def indicator_score(country, year, indicator):
+    return wgi.at[(year, country), indicator]
 
 def hhicalc(material, year):
     return hhifinal.loc[(year, material)]
@@ -204,7 +213,7 @@ def rec_red(year, country, material, reduction, indicator):
         
       return (geopol_bcs.loc[(year, material)], geopol_wcs.loc[(year, material)])
 
-def rec_red_plot(year, country, material):
+def rec_red_plot(year, country, material, reduction):
       y0 = rec_red(year, country, material, 0, "WGI Score")
       y5 = rec_red(year, country, material, 5, "WGI Score")
       y10 = rec_red(year, country, material, 10, "WGI Score")
@@ -228,7 +237,52 @@ def rec_red_plot(year, country, material):
       y100 = rec_red(year, country, material, 100, "WGI Score")
 
       x = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100]
-      y = [y0, y5, y10, y15, y20, y25, y30, y35, y40, y45, y50, y55, y60, y65, y70, y75, y80, y85, y90, y95, y100]
+      y1 = [y0[0], y5[0], y10[0], y15[0], y20[0], y25[0], y30[0], y35[0], y40[0], y45[0], y50[0],
+       y55[0], y60[0], y65[0], y70[0], y75[0], y80[0], y85[0], y90[0], y95[0], y100[0]]
+      y2 = [y0[1], y5[1], y10[1], y15[1], y20[1], y25[1], y30[1], y35[1], y40[1], y45[1], y50[1],
+       y55[1], y60[1], y65[1], y70[1], y75[1], y80[1], y85[1], y90[1], y95[1], y100[1]]
+
+      ylegend = (y10[0]+y10[1])/2
+      trace1 = go.Scatter(x=x, y=y1, name='Best Case',
+       line=dict(color='firebrick', width=4))
+      trace2 = go.Scatter(x=x, y=y2, name = 'Worst Case',
+       line=dict(color='royalblue', width=4))
+      layout = go.Layout(shapes=[dict(type="line", x0=reduction, y0=0, x1=reduction, y1=ylegend, line=dict(color="Green", width=2)),
+                              dict(type="line", x0=0, y0=ylegend, x1=reduction,
+                                   y1=ylegend, line=dict(color="Green", width=2))])
+      data = [trace1, trace2]
+      fig = go.Figure(data, layout)
+      
+      graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+      return graphJSON
+
+def indicatorplot(country):
+      x = [2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017]
+      y1 = [indicator_score(country, 2008, "WGI Score"), indicator_score(country, 2009, "WGI Score"),
+        indicator_score(country, 2010, "WGI Score"), indicator_score(country, 2011, "WGI Score"),
+        indicator_score(country, 2012, "WGI Score"), indicator_score(country, 2013, "WGI Score"),
+        indicator_score(country, 2014, "WGI Score"), indicator_score(country, 2015, "WGI Score"),
+        indicator_score(country, 2016, "WGI Score"), indicator_score(country, 2017, "WGI Score")]
+      y2 = [indicator_score(country, 2008, "HDI Score"), indicator_score(country, 2009, "HDI Score"),
+        indicator_score(country, 2010, "HDI Score"), indicator_score(country, 2011, "HDI Score"),
+        indicator_score(country, 2012, "HDI Score"), indicator_score(country, 2013, "HDI Score"),
+        indicator_score(country, 2014, "HDI Score"), indicator_score(country, 2015, "HDI Score"),
+        indicator_score(country, 2016, "HDI Score"), indicator_score(country, 2017, "HDI Score")]
+    
+    
+      fig = make_subplots(specs=[[{"secondary_y": True}]])
+      fig.add_trace(go.Scatter(name="WGI", x=x, y=y1, line=dict(color='firebrick', width=4)), secondary_y=False)
+      fig.add_trace(go.Scatter(name="HDI", x=x, y=y2, line=dict(color='blue', width=4)), secondary_y=True)
+      graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+      return graphJSON
+
+def timeplot(material, country, indicator):
+      x = [2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017]
+      y = (gpol(2008, country, material, indicator), gpol(2009, country, material, indicator), 
+      gpol(2010, country, material, indicator), gpol(2011, country, material, indicator), 
+      gpol(2012, country, material, indicator), gpol(2013, country, material, indicator), 
+      gpol(2014, country, material, indicator), gpol(2015, country, material, indicator), 
+      gpol(2016, country, material, indicator), gpol(2017, country, material, indicator))
 
       img = io.BytesIO()
       plt.plot(x, y)

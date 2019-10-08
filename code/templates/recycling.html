@@ -1,37 +1,67 @@
 {% extends "layout.html" %}
-{% import 'bootstrap/wtf.html' as wtf %}
+{% from "_formmacro.html" import render_field %}
 
-{% block app_content %}
-    <h1>GPSR Calculation</h1>
-    <div class="row">
-        <div class="col-md-4">
-            {{ wtf.quick_form(form) }}
+{% block content %}
+    <h1>Requirement Reduction</h1>
+    <div class="container theme-showcase" role="main">
+        <div class="well bs-component">
+            <form class="form-horizontal", action="" method="post">
+            {{ form.csrf_token }}
+                <fieldset>
+                    <legend>This number can be interpreted as a portion of the domestically recycled material that is reintroduced in the material's supply chain.</legend>
+                    {{ render_field(form.country, placeholder="Choose Country") }}
+                    {{ render_field(form.material, placeholder="Choose Material") }}
+                    {{ render_field(form.year, placeholder="Select Year") }}
+                    {{ render_field(form.indicator, placeholder="Choose Indicator") }}
+                    {{ render_field(form.reduction, placeholder="Requirement Reduction") }}
+                    <div class="form-group">
+                        <div class="col-md-10 col-md-offset-2">
+                            <button type="submit" class="btn btn-primary">Calculate</button>
+                        </div>
+                    </div>
+                </fieldset>
+            </form>
         </div>
     </div>
 
     <p><a href="/">Click here to calculate again</a>
 
-    <div class="row">
-        <div class="col-md-4">
-            <p> Country = {{country}} </p>
-            <p> Material = {{form.material.data}} </p>
-            <p> Year = {{form.year.data}} </p>
-            <p> Indicator = {{form.indicator.data}} </p>
-        </div>
-    
-        <div class="col-md-8"
-            <p>The HHI score is: {{ hhi }}</p>
-            <p>The GPSR score is: {{ gpsr }}</p>
-            <p>The Recycling Reduction score is: {{ reduction }}</p>
-            <p>The updated GPSR score for best case scenarios is: {{ best_case }}</p>
-            <p>The updated GPSR score for worst case scenarios is: {{ worst_case }}</p>
-        </div>
+    <div class='container'>
+        <table class="table">
+            <thead>
+                <tr>
+                <th scope="col">#</th>
+                <th scope="col">Country Name</th>
+                <th scope="col">Material Name</th>
+                <th scope="col">Year</th>
+                <th scope="col">HHI Score</th>
+                <th scope="col">{{ indicator }}</th>   
+                <th scope="col">Best Case</th>
+                <th scope="col">Worst Case</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                <th scope="row">1</th>
+                <td>{{ countryname }}</td>
+                <td>{{ materialname }}</td>
+                <td>{{ form.year.data }}</td>
+                <td>{{ hhi }}</td>
+                <td>{{ gpsr }}</td>
+                <td>{{ best_case }}</td>
+                <td>{{ worst_case }}</td>                
+                </tr>
+            </tbody>
+        </table>
     </div>
-        
-        <h1>Graphs</h1>
-
-            <div> Recycling Reduction of {{ form.material.data}} from 0% - 100% for {{ country }} </div>
-            <div> <img src='{{graph1}}'></img></div>
-
-
+    
+    <h1>Graphs</h1>
+        <div> Recycling Reduction of {{ materialname }} from 0% - 100% for {{ countryname }} </div>
+            <div class="chart" id="linegraph">
+                <script>
+                    var graphs = {{plot | safe}};
+                    Plotly.plot('linegraph',graphs,{});
+                </script>
+            </div>
+        </div>
 {% endblock %}
