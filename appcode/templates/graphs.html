@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+{% block content %}
+    <h1>Graphs</h1>
+        <div> WGI vs HDI for USA </div>
+            <div class="chart" id="linegraph">
+                <script>
+                    var graphs = {{plot | safe}};
+                    Plotly.plot('linegraph',graphs,{});
+                </script>
+            </div>
+        </div>
+{% endblock %}

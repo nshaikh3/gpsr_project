@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+{% from "_formmacro.html" import render_field %}
+
+{% block content %}
+    <h1>User Registration</h1>
+    <div class="container theme-showcase" role="main">
+        <div class="well bs-component">
+            <form class="form-horizontal", action="" method="post">
+            {{ form.csrf_token }}
+                <fieldset>
+                    <legend>Register</legend>
+                    {{ render_field(form.username, placeholder="Enter username") }}
+                    {{ render_field(form.email, placeholder="Enter email") }}                    
+                    {{ render_field(form.password, placeholder="Enter password") }}
+                    {{ render_field(form.password2, placeholder="Confirm password") }}
+                    <div class="form-group">
+                        <div class="col-md-10 col-md-offset-2">
+                            <button type="submit" class="btn btn-primary">Register</button>
+                        </div>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+{% endblock %}

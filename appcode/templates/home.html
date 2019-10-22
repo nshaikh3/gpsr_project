@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <h1>Hi, {{ current_user.username }}!</h1>
+
+    <div class="row calculationOption">
+        <h1><a href="{{ url_for('calculate') }}">GPSR Calculation</a></h1>
+    </div>
+
+    <div class="row calculationOption">
+        <h1><a href="{{ url_for('calculate1') }}">Requirement Reduction Calculation</a></h1>
+    </div>
+    
+{% endblock %}
