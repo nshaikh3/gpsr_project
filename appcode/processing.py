@@ -4,8 +4,12 @@ import plotly
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import json
+import os
 
-myfile2 = pd.ExcelFile(r'C:\Users\noor-\Desktop\Waterloo\Research\gpsr_project\data\GeoPolRisk.xlsx')
+THIS_FOLDER = os.path.dirname(os.path.abspath(__file__))
+my_file = os.path.join(THIS_FOLDER, 'GeoPolRisk.xlsx')
+
+myfile2 = pd.ExcelFile(my_file)
 print(myfile2.sheet_names)
 
 countries = myfile2.parse('Countries')
@@ -128,7 +132,6 @@ def rec_red(year, country, material, reduction, indicator):
       indicator_table = wgi.loc[:, ("Country Name", indicator)]
     # used to create new table for bcs and wcs
       b = trade.loc[(year, material, country), :]
-      b = b.iloc[0, :]
       b = b[b!=0].rename("Amount")
       b.index.name = "Country Code"
     
@@ -139,7 +142,7 @@ def rec_red(year, country, material, reduction, indicator):
       if 839 in b.index:
             totsupply = trade.loc[(year, material, country), 0]
             weightedsupply = b.loc[:, "WGI Score"].mul(b.loc[:, "Amount"].reindex())
-            weightedsupply = weightedsupply /(totsupply.values)
+            weightedsupply = weightedsupply /(totsupply)
             updatedwgi = weightedsupply.sum()
             b.at[839, indicator] = updatedwgi
         
@@ -149,7 +152,7 @@ def rec_red(year, country, material, reduction, indicator):
       wcs = b.sort_values((indicator), ascending=True).reindex()
       wcs.index.name = 'Country Code'
         
-      a = (trade.loc[(year, material, country), 0]).values*(reduction*0.01)
+      a = (trade.at[(year, material, country), 0])*(reduction*0.01)
 
 # Best case scenario
 
@@ -169,11 +172,11 @@ def rec_red(year, country, material, reduction, indicator):
                   bcs.at[row.Index, "New Amount"] = bcs.at[row.Index, "Amount"]
             
             
-      trade_denom_bcs = prodata.loc[(year, material), country_name] + trade.loc[(year, material, country), 0].values
+      trade_denom_bcs = prodata.at[(year, material), country_name] + trade.at[(year, material, country), 0]
     
       adj_trade2 = bcs.loc[:, "New Amount"].apply(lambda x: x/trade_denom_bcs, 0).reindex()
 
-      fin_trade2 = adj_trade2.apply(lambda x: x*bcs.loc[:, indicator])
+      fin_trade2 = bcs[indicator].mul(adj_trade2, axis=0)
       weight_sum = fin_trade2.sum()
       geopol_bcs = weight_sum*hhifinal.loc[year, material]
     
@@ -181,7 +184,7 @@ def rec_red(year, country, material, reduction, indicator):
     #print(geopol_bcs.loc[(year, material)])
 
 # Worst case scenario
-      a2 = (trade.loc[(year, material, country), 0]).values*(reduction*0.01)
+      a2 = (trade.at[(year, material, country), 0])*(reduction*0.01)
     
       for row in wcs.itertuples():
             if wcs.at[row.Index, "Amount"] - a2 < 0:
@@ -198,11 +201,11 @@ def rec_red(year, country, material, reduction, indicator):
             if wcs.at[row.Index, "New Amount2"] < 0:
                   wcs.at[row.Index, "New Amount"] = wcs.at[row.Index, "Amount"]
             
-      trade_denom_wcs = prodata.loc[(year, material), country_name] + trade.loc[(year, material, country), 0].values
+      trade_denom_wcs = prodata.at[(year, material), country_name] + trade.at[(year, material, country), 0]
     
       adj_trade3 = wcs.loc[:, "New Amount"].apply(lambda x: x/trade_denom_wcs, 0).reindex()
 
-      fin_trade3 = adj_trade3.apply(lambda x: x*wcs.loc[:, indicator])
+      fin_trade3 = wcs[indicator].mul(adj_trade3, axis=0)
       weight_sum2 = fin_trade3.sum()
       geopol_wcs = weight_sum2*hhifinal.loc[year, material]
     
