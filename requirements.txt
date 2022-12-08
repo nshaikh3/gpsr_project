@@ -1,5 +1,5 @@
 alembic==1.2.1
-certifi==2019.6.16
+certifi==2022.12.7
 Click==7.0
 cycler==0.10.0
 dominate==2.4.0
